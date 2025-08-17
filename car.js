@@ -6,6 +6,8 @@ class Car {
 		this.width = width;
 		this.height = height;
 		this.color = "black";
+		//this will create a control and fetch all the controls from the control.js file and class
+		this.controls = new Controls();
 	}
 
 	//draw method to draw the car
