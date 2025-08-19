@@ -10,6 +10,18 @@ class Car {
 		this.controls = new Controls();
 	}
 
+	//lets add a update function that will tell it move in forward and backward direction , this function will be called in main.js to draw the car in the particular direction
+
+	update() {
+		if (this.controls.forward) {
+			//y expand in forward direction
+			this.y -= 2;
+		}
+		if (this.controls.backward) {
+			this.y += 2;
+		}
+	}
+
 	//draw method to draw the car
 	draw(ctx) {
 		ctx.beginPath();

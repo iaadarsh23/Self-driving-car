@@ -3,7 +3,7 @@ class Controls {
 		this.forward = false;
 		this.left = false;
 		this.right = false;
-		this.reverse = false;
+		this.backward = false;
 
 		//we have added #because this is a private method;
 		this.#addKeyboardListners();
@@ -23,7 +23,7 @@ class Controls {
 					this.forward = true;
 					break;
 				case "ArrowDown":
-					this.reverse = true;
+					this.backward = true;
 					break;
 			}
 			//this is for debugging this will print entire table on the action
@@ -44,7 +44,7 @@ class Controls {
 					this.forward = false;
 					break;
 				case "ArrowDown":
-					this.reverse = false;
+					this.backward = false;
 					break;
 			}
 			//this is for debugging this will print entire table on the action
