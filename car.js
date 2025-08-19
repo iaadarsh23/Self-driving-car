@@ -7,6 +7,11 @@ class Car {
 		this.height = height;
 		this.color = "black";
 		//this will create a control and fetch all the controls from the control.js file and class
+		this.speed = 0;
+		this.acceleration = 0.2;
+		this.maxSpeed = 3;
+		this.friction = 0.05;
+		this.angle = 0;
 		this.controls = new Controls();
 	}
 
@@ -14,26 +19,65 @@ class Car {
 
 	update() {
 		if (this.controls.forward) {
-			//y expand in forward direction
-			this.y -= 2;
+			//make it move like a car
+			this.speed += this.acceleration;
+		}
+		if (this.speed > this.maxSpeed) {
+			this.speed = this.maxSpeed;
 		}
 		if (this.controls.backward) {
-			this.y += 2;
+			this.speed -= this.acceleration;
 		}
+		//here the minus sign indicates that we are going in reverse;
+		if (this.speed < -this.maxSpeed / 2) {
+			// clamp reverse speed to half of forward max speed
+			this.speed = -this.maxSpeed / 2;
+		}
+
+		//if the speed is greater than or lesser than 0 then we will decrease and increase it with respect to the friction
+		if (this.speed > 0) {
+			this.speed -= this.friction;
+		}
+		if (this.speed < 0) {
+			this.speed += this.friction;
+		}
+
+		//the car keeps moving even when i stopped pressing forward btn because the friction we have given will keep it bouncing so lets fix thi
+
+		if (Math.abs(this.speed) < this.friction) {
+			this.speed = 0;
+		}
+
+		//lets move it left and write also
+
+		if (this.controls.left) {
+			this.angle += 0.03;
+		}
+		if (this.controls.right) {
+			this.angle -= 0.03;
+		}
+		//we are doing this to move the car in certain angles like a real car
+		this.x -= Math.sin(this.angle) * this.speed;
+		this.y -= Math.cos(this.angle) * this.speed;
 	}
 
 	//draw method to draw the car
 	draw(ctx) {
+		ctx.save();
+		ctx.translate(this.x, this.y);
+		ctx.rotate(-this.angle);
 		ctx.beginPath();
 		ctx.rect(
 			//x of the car will be the center so we divide it using the width similarly for the y
 
-			this.x - this.width / 2,
-			this.y - this.height / 2,
+			-this.width / 2,
+			-this.height / 2,
 			this.width,
 			this.height
 		);
 		ctx.fillStyle = this.color;
 		ctx.fill();
+		//we are restoring this to prevent the infinite rotation after each frame;
+		ctx.restore();
 	}
 }

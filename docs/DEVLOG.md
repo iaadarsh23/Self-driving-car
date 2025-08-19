@@ -9,6 +9,36 @@ How to use this log:
 
 ---
 
+## 2025-08-19 — 0003: Fix reverse speed clamp so car stops after releasing ArrowDown
+
+Summary
+
+- Car kept sliding after releasing the backward key because reverse speed was clamped incorrectly.
+
+Bug
+
+- In `car.js`, we intended reverse max to be half of forward: `speed >= -maxSpeed/2`.
+- Code mistakenly set `speed = -maxSpeed` when `speed < -maxSpeed/2`, making reverse too strong and prolonging deceleration.
+
+Fix
+
+- Change the clamp to `this.speed = -this.maxSpeed / 2;` when `this.speed < -this.maxSpeed / 2`.
+
+Files touched
+
+- `car.js`: correct reverse clamp value.
+
+How to test
+
+- Hold ArrowDown to reverse; release.
+- The car should decelerate smoothly and come to a stop faster than before (since friction has less negative speed to counteract).
+
+Suggested commit message
+
+- "Physics: correct reverse speed clamp to -maxSpeed/2"
+
+---
+
 ## 2025-08-19 — 0001: Initial canvas + Car class, visible render
 
 Summary
@@ -43,6 +73,51 @@ How to test
 Suggested commit message
 
 - "Initial canvas + Car class; fix script order and color handling"
+
+---
+
+## 2025-08-19 — 0002: Keyboard controls + animation loop + simple movement
+
+Summary
+
+- Add a `Controls` class for Arrow keys, an animation loop, and simple speed/acceleration/friction to move the car on the canvas.
+
+Steps
+
+1. Create `controls.js` with a `Controls` class that tracks `forward`, `backward`, `left`, `right` using keyboard events.
+2. Update `index.html` to load scripts in this order: `controls.js`, `car.js`, then `script.js` (so dependencies are defined before use).
+3. In `car.js` add fields: `speed`, `acceleration`, `maxSpeed`, `friction`, and `controls = new Controls()`.
+4. Implement `update()` in `Car`:
+   - If `forward`, increase `speed` by `acceleration`.
+   - If `backward`, decrease `speed` by `acceleration`.
+   - Clamp `speed` within `[-maxSpeed/2, maxSpeed]` (reverse is slower).
+   - Apply `friction` toward zero each frame; snap to 0 when below friction so the car fully stops.
+   - Move along Y with `this.y -= this.speed` (canvas up is forward).
+5. In `script.js` add `animate()` with `requestAnimationFrame`:
+   - Call `car.update()`.
+   - Reset `canvas.height = window.innerHeight` to clear each frame (avoid stretching/smear).
+   - Call `car.draw(ctx)`.
+
+Why this change
+
+- Introduces continuous rendering and basic physics so the car behaves more like a vehicle (accelerates and slows with friction) instead of teleporting.
+
+Files touched
+
+- `controls.js`: new file handling Arrow key input.
+- `index.html`: ensure load order `controls.js` → `car.js` → `script.js`.
+- `car.js`: add movement state + `update()` logic; keep `draw()` the same.
+- `script.js`: add `animate()` loop; clear and redraw each frame.
+
+How to test
+
+- Open `index.html` in a browser.
+- Press ArrowUp to accelerate forward (car moves upward). Release; it slows down and eventually stops due to friction.
+- Press ArrowDown to reverse (moves downward) with a slower max reverse speed.
+
+Suggested commit message
+
+- "Controls + animation loop: add acceleration, friction, and continuous render"
 
 ---
 
