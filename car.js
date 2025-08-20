@@ -18,6 +18,9 @@ class Car {
 	//lets add a update function that will tell it move in forward and backward direction , this function will be called in main.js to draw the car in the particular direction
 
 	update() {
+		this.#move();
+	}
+	#move() {
 		if (this.controls.forward) {
 			//make it move like a car
 			this.speed += this.acceleration;
@@ -49,13 +52,16 @@ class Car {
 		}
 
 		//lets move it left and write also
+		if (this.speed != 0) {
+			const flip = this.speed > 0 ? 1 : -1;
+			if (this.controls.left) {
+				this.angle += 0.03 * flip;
+			}
+			if (this.controls.right) {
+				this.angle -= 0.03 * flip;
+			}
+		}
 
-		if (this.controls.left) {
-			this.angle += 0.03;
-		}
-		if (this.controls.right) {
-			this.angle -= 0.03;
-		}
 		//we are doing this to move the car in certain angles like a real car
 		this.x -= Math.sin(this.angle) * this.speed;
 		this.y -= Math.cos(this.angle) * this.speed;

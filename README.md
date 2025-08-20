@@ -1,119 +1,115 @@
-# Self‑driving Car (Canvas) — Interview Notes
+## Project Title
 
-This project is a minimal canvas setup that draws a car and sets the stage for adding movement, road, and sensors later. Use this as a quick reference when explaining the code and your choices to an interviewer.
+Self‑driving Car — HTML5 Canvas Playground
 
-## Stack
+![Badge: HTML5 Canvas](https://img.shields.io/badge/Render-HTML5%20Canvas-orange)
+![Badge: Vanilla JS](https://img.shields.io/badge/Stack-Vanilla%20JS-blue)
+![Badge: No Build](https://img.shields.io/badge/Build-None-success)
+![Badge: Works Offline](https://img.shields.io/badge/Offline-Yes-brightgreen)
 
-- HTML5 Canvas for rendering
-- Vanilla JavaScript for logic
-- CSS for basic layout and background
+### Introduction
 
-## Project structure
+This is a minimal, dependency‑free demo that renders a car on an HTML5 canvas and moves it using keyboard input. It’s designed as a foundation for learning self‑driving car concepts step‑by‑step (movement, rotation, road, sensors, and later simple AI).
 
-- `index.html` — Boots the app; loads scripts in the correct order
-- `style.css` — Page and canvas styling
-- `controls.js` — Keyboard input handler (`Controls` class)
-- `car.js` — `Car` class (state, simple physics, draw routine)
-- `script.js` — App entry: canvas init + animation loop
+- Runs in any modern browser
+- Tiny codebase: just HTML, CSS, and two JavaScript classes
+- Great for experiments, teaching, and interview walkthroughs
 
-## File‑by‑file walkthrough
+### Features
 
-### `index.html`
+- Real‑time keyboard controls (Arrow keys via `Controls`)
+- Simple car‑like motion: acceleration, max speed, friction, reverse clamped to half speed
+- Rotation with correct left/right behavior when reversing (steering flip)
+- Clean animation loop with `requestAnimationFrame`
+- Narrow canvas width (200px) to simulate a lane and keep focus on motion
 
-- Declares a full‑page `<canvas id="myCanvas">`.
-- Loads scripts in this order:
-  1. `controls.js` (defines `Controls` used by `Car`)
-  2. `car.js` (defines the `Car` class)
-  3. `script.js` (boots the app and runs the loop)
-- Why order matters: If you use a class before it’s defined, the browser throws a runtime error and stops executing, so nothing is drawn.
+### Installation
 
-### `style.css`
+No build tools required.
 
-- Removes default margins and hides scrollbars (clean canvas presentation).
-- Sets a neutral grey background on the canvas so a dark car is visible.
+1. Download or clone the repo
 
-### `car.js`
-
-- Defines `class Car` with properties: `x`, `y`, `width`, `height`, `color`, plus movement state: `speed`, `acceleration`, `maxSpeed`, `friction`, and `controls`.
-- `update()`: reads keyboard input (`forward`/`backward`) to change `speed`, caps speed, applies friction to slow down when no key is pressed, then moves along Y with `this.y -= this.speed` (up is forward on canvas).
-- `draw(ctx)`: draws a centered rectangle and fills it with `this.color`.
-- Centering math: subtract half width/height so the car’s position is the center, not top‑left.
-
-### `script.js`
-
-- Grabs the canvas/context; sets width to `200` (narrow lane feel).
-- Starts an `animate()` loop with `requestAnimationFrame`.
-- Each frame: `car.update(); canvas.height = window.innerHeight; car.draw(ctx);`.
-- Note: resetting `canvas.height` each frame clears the canvas to avoid stretch/smear and keeps the car crisp.
-
-## Render & input flow (what happens on page load)
-
-1. HTML loads and creates the canvas.
-2. `controls.js` defines `Controls` and attaches keyboard listeners for Arrow keys.
-3. `car.js` defines `Car` and simple movement/physics.
-4. `script.js` initializes the canvas, creates a `Car`, sets its color, then starts the animation loop that updates input/physics and draws every frame.
-
-## Key fixes and additions
-
-- Script order: `controls.js` → `car.js` → `script.js` so dependencies exist before use.
-- Fill color: `Car.draw()` uses `ctx.fillStyle = this.color`.
-- Animation: added a `requestAnimationFrame` loop; clearing by resetting `canvas.height` each frame.
-- Movement: acceleration, max speed, and friction create a simple car‑like feel; ArrowUp drives forward, ArrowDown reverses.
-
-## How to run locally
-
-1. Open `index.html` in a browser (no server required).
-2. You should see a grey canvas with a blue rectangle (the car). Use ArrowUp/ArrowDown to move.
-3. If the car doesn’t appear, open DevTools (F12) → Console and check for errors.
-
-## Push to GitHub (PowerShell)
-
-If this folder is not a git repo yet:
+- Download ZIP and extract, or
+- Clone with Git (PowerShell):
 
 ```powershell
-# From the project root; paths with spaces are fine in PowerShell
-git init
-git add .
-git commit -m "Initial canvas + Car class; fix script order and color handling"
-
-# Create a new empty repo on GitHub named "Self-driving-car", then:
-git branch -M main
-git remote add origin https://github.com/<your-username>/Self-driving-car.git
-git push -u origin main
+git clone https://github.com/<your-username>/Self-driving-car.git
+cd Self-driving-car
 ```
 
-If it’s already a git repo and remote is set:
+2. Open `index.html` in your browser
 
-```powershell
-git add .
-git commit -m "Docs: add interview-ready README and code walkthrough"
-git push
+- Double‑click `index.html`, or use a simple static server if you prefer.
+
+### Usage Examples
+
+Open the page and use ArrowUp / ArrowDown to move, ArrowLeft / ArrowRight to steer. The car starts as a blue rectangle centered by its (x, y) with rotation.
+
+- Change appearance:
+
+```js
+// script.js
+const car = new Car(100, 100, 30, 50);
+car.color = "royalblue"; // or any CSS color
 ```
 
-Tip: If pushing from a corporate or restricted network, you may need a Personal Access Token (PAT) for HTTPS auth.
+- Tweak handling (after creating the car):
 
-## Troubleshooting: “I can’t see the car”
+```js
+car.acceleration = 0.25; // faster pick‑up
+car.maxSpeed = 4; // higher top speed
+car.friction = 0.06; // stronger natural slowdown
+```
 
-- Check the browser console for errors like `ReferenceError: Car is not defined` → indicates wrong script order.
-- Confirm `car.color` is set before `car.draw(ctx)`.
-- Ensure the canvas isn’t 0×0 (we set width=200, height=window.innerHeight).
-- The car is at `(100, 100)`; on a very tall screen it might look near the top—this is expected.
+- Create a different car size or starting position:
 
-## Interview talking points
+```js
+const car = new Car(150, 300, 40, 70);
+```
 
-- Canvas coordinate system (top‑left origin, y increases downward) and why we center the car with `x - width/2`, `y - height/2`.
-- Separation of concerns: `Car` encapsulates draw logic; `script.js` orchestrates app bootstrapping.
-- Importance of script load order in the browser and failure modes when violated.
-- Why the canvas width is narrow (200px) to simulate a road lane and make future lane‑keeping logic clearer.
-- Extensibility: easy to add wheels, rotation, movement, keyboard controls, a road with lanes, and sensors (rays) later.
+### Capabilities & Limitations
 
-## Next steps (nice to mention)
+Capabilities
 
-- Add an animation loop with `requestAnimationFrame` for movement.
-- Keyboard controls to update `Car` position/heading.
-- Draw a road and lane markers; add collision detection and simple AI later.
+- Smooth motion with acceleration and friction
+- Rotation using basic trigonometry (sin/cos)
+- Reverse speed limited to half of forward top speed
 
-## Ongoing documentation
+Limitations (by design for simplicity)
 
-- For step-by-step updates in simple language, see `docs/DEVLOG.md`.
-- Add a new entry there whenever you change code so you’re always interview-ready.
+- No road, walls, or collision detection yet
+- No sensors or AI control
+- Uses a rectangle placeholder, not a sprite
+
+### Configuration Options
+
+You can tune these properties on a `Car` instance:
+
+- `acceleration` (default `0.2`) — How quickly speed changes when pressing Up/Down
+- `maxSpeed` (default `3`) — Forward top speed; reverse is clamped to half
+- `friction` (default `0.05`) — Passive slowdown when not accelerating
+- `color` (default `"black"`, set to `"blue"` in `script.js`) — Fill color when drawing
+
+Constructor:
+
+- `new Car(x, y, width, height)` — Position is interpreted as the car’s center
+
+### Contributing Guidelines
+
+1. Fork this repository and create a feature branch
+2. Keep code small and readable; add comments where intent isn’t obvious
+3. Test in a browser (desktop and mobile if possible)
+4. Open a Pull Request with a clear description and before/after notes or screenshots
+
+Ideas welcome: road drawing, lane markers, collisions, sensors (ray casting), basic path following.
+
+### License
+
+No license file currently detected. If you are the project owner, consider adding a LICENSE (e.g., MIT). Until then, assume default “All rights reserved.”
+
+### Links
+
+- App entry: `index.html`
+- Source: `car.js`, `controls.js`, `script.js`
+- Styles: `style.css`
+- Dev notes and deeper internals: `docs/DEVLOG.md` and `devlog.md`
