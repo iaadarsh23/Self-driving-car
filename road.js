@@ -7,6 +7,27 @@ class Road {
 		this.left = this.x - width / 2;
 		this.right = this.x + width / 2;
 		//i want to make sure that lane is moving infinitely
-		const infinity = 1000000000000;
+		const infinity = 10000000;
+		this.top = -infinity;
+		this.bottom = infinity;
+	}
+
+	//lets draw the road
+	draw(ctx) {
+		ctx.lineWidth = 5;
+		ctx.strokeStyle = "white";
+		for (let i = 0; i <= this.laneCount; i++) {
+			const x = lerp(this.left, this.right, i / this.laneCount);
+			//lets draw the dash lines
+			if (i > 0 && i < this.laneCount) {
+				ctx.setLineDash([20, 20]);
+			} else {
+				ctx.setLineDash([]);
+			}
+			ctx.beginPath();
+			ctx.moveTo(x, this.top);
+			ctx.lineTo(x, this.bottom);
+			ctx.stroke();
+		}
 	}
 }
