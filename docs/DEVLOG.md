@@ -9,6 +9,59 @@ How to use this log:
 
 ---
 
+## 2025-08-24 — 0005: Sensors, collision polygon & red crash animation
+
+Summary
+
+- Added car polygon collision detection against road borders, sensor ray casting, and a red crash pulse animation when the car hits a border.
+
+Changes
+
+1. `car.js`
+   - Added `polygon` creation (`#createPolygon`) based on car rectangle rotated by current `angle`.
+   - Added `polysIntersect` usage in `#assessDamage` to detect collision with each road border segment.
+   - Introduced damage state (`damaged`) and crash animation counters (`_crashFrames`, `_crashMaxFrames`).
+   - On first collision: set `damaged = true` and start countdown; movement stops updating after damage.
+   - Draw routine now renders polygon and overlays red pulse + radial gradient halo while crash animation is active.
+2. `road.js`
+   - Renamed border array to `borders` (plural) for clarity and compatibility with GitHub-sourced sensor code.
+   - Provides vertical infinite illusion with large top/bottom extents.
+3. `utils.js`
+   - Added `polysIntersect(polyA, polyB)` helper using edge–edge intersection (`getIntersection`).
+4. `sensor.js`
+   - Implemented ray casting (`#rayCast`) spread by `raySpread` around car heading.
+   - For each ray, finds nearest intersection with road borders via `getIntersection` and records `reading` (shortest offset).
+   - Draws each ray: visible portion in yellow, remainder (if hit) in black.
+5. `index.html`
+   - Ensured load order includes `sensor.js` before `car.js` so `Car` can instantiate `Sensor` safely.
+6. `script.js`
+   - Passes `road.borders` into `car.update()` so sensors and collision detection have geometry.
+
+Why
+
+- Polygon collision allows rotation-aware border detection vs naive AABB.
+- Sensors lay groundwork for future AI (lane keeping, obstacle avoidance).
+- Visual crash feedback improves UX and debugging clarity.
+
+Testing steps
+
+1. Drive forward into left or right border; car should flash red and stop moving (except crash animation fade-out).
+2. Reload and steer gently—no crash animation until crossing border line.
+3. Inspect rays (yellow) updating with car rotation; when near border, some rays should shorten (black remainder displayed).
+
+Potential follow-ups
+
+- Add traffic car polygons and include them in collision + sensor readings.
+- Persist best performance (distance traveled before crash) to localStorage.
+- Parameterize crash animation duration via a config object.
+- Disable sensors after crash or fade them out visually.
+
+Suggested commit message
+
+"Collision & sensors: add polygon intersection, ray casting, and crash pulse animation"
+
+---
+
 ## 2025-08-22 — 0004: Add multi-lane road with dashed lane lines
 
 Summary

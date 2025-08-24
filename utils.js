@@ -20,3 +20,18 @@ function getIntersection(A, B, C, D) {
 
 	return null;
 }
+
+function polysIntersect(polyA, polyB) {
+	for (let i = 0; i < polyA.length; i++) {
+		const a1 = polyA[i];
+		const a2 = polyA[(i + 1) % polyA.length];
+		for (let j = 0; j < polyB.length; j++) {
+			const b1 = polyB[j];
+			const b2 = polyB[(j + 1) % polyB.length];
+			if (getIntersection(a1, a2, b1, b2)) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
