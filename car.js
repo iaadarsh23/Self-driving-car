@@ -12,6 +12,7 @@ class Car {
 		this.maxSpeed = 3;
 		this.friction = 0.05;
 		this.angle = 0;
+		this.sensor = new Sensor(this);
 		this.controls = new Controls();
 	}
 
@@ -19,6 +20,7 @@ class Car {
 
 	update() {
 		this.#move();
+		this.sensor.update();
 	}
 	#move() {
 		if (this.controls.forward) {
@@ -85,5 +87,6 @@ class Car {
 		ctx.fill();
 		//we are restoring this to prevent the infinite rotation after each frame;
 		ctx.restore();
+		this.sensor.draw(ctx);
 	}
 }
