@@ -51,43 +51,48 @@ Open the page and use ArrowUp / ArrowDown to move, ArrowLeft / ArrowRight to ste
 // script.js
 const car = new Car(100, 100, 30, 50);
 car.color = "royalblue"; // or any CSS color
-```
+ This is a minimal, dependency‑free demo that renders a car on an HTML5 canvas, places it on a multi‑lane road, and moves it using keyboard input. It’s designed as a foundation for learning self‑driving car concepts step‑by‑step (movement, rotation, lane positioning, sensors, and later simple AI).
 
-- Tweak handling (after creating the car):
+ Tiny codebase: just HTML, CSS, and a few small JavaScript modules (`Controls`, `Car`, `Road`, `utils`)
 
-```js
+ Simple car‑like motion: acceleration, max speed, friction, reverse clamped to half speed
+ Multi‑lane road rendering with dashed interior lane dividers and solid borders
+ Lane indexing helper (`road.getCenter(index)`) for spawning / aligning cars
 car.acceleration = 0.25; // faster pick‑up
 car.maxSpeed = 4; // higher top speed
 car.friction = 0.06; // stronger natural slowdown
 ```
 
-- Create a different car size or starting position:
-
-```js
+Infinite vertical road illusion using very large top/bottom extents
+Dashed lane lines and solid borders for visual clarity
 const car = new Car(150, 300, 40, 70);
-```
 
-### Capabilities & Limitations
+````
 
-Capabilities
+ No other traffic or obstacles
+ Uses a rectangle placeholder (no sprite or image assets)
 
 - Smooth motion with acceleration and friction
 - Rotation using basic trigonometry (sin/cos)
 - Reverse speed limited to half of forward top speed
 
-Limitations (by design for simplicity)
-
-- No road, walls, or collision detection yet
-- No sensors or AI control
 - Uses a rectangle placeholder, not a sprite
 
 ### Configuration Options
-
+ Road configuration:
+ `new Road(xCenter, width, laneCount = 3)`
+ `road.getCenter(index)` → x coordinate of the lane center (0‑based)
+ Interior lane lines are dashed; outer ones solid.
 You can tune these properties on a `Car` instance:
+ Example:
+ ```js
+ const road = new Road(canvas.width / 2, canvas.width * 0.9, 4);
+ const car = new Car(road.getCenter(0), 100, 30, 50);
+````
 
 - `acceleration` (default `0.2`) — How quickly speed changes when pressing Up/Down
 - `maxSpeed` (default `3`) — Forward top speed; reverse is clamped to half
-- `friction` (default `0.05`) — Passive slowdown when not accelerating
+  Source: `car.js`, `controls.js`, `road.js`, `utils.js`, `script.js`
 - `color` (default `"black"`, set to `"blue"` in `script.js`) — Fill color when drawing
 
 Constructor:

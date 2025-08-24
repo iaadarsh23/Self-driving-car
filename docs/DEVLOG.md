@@ -9,6 +9,46 @@ How to use this log:
 
 ---
 
+## 2025-08-22 — 0004: Add multi-lane road with dashed lane lines
+
+Summary
+
+- Added a `Road` class (`road.js`) to render a vertically “infinite” multi-lane road. Interior lane lines are dashed; outer borders solid. Provides lane centers for spawning cars.
+
+Steps
+
+1. Create `utils.js` with `lerp(A,B,t)` (moved from inline usage for reuse).
+2. Create `road.js` with constructor storing `left`, `right`, huge `top`/`bottom` extents (`±10,000,000`).
+3. Implement `getCenter(index)` to compute center x of lane `index`.
+4. In `road.draw(ctx)`, loop `i=0..laneCount`: dashed lines only when `0 < i < laneCount`; solid for borders.
+5. Update `index.html` to load `utils.js` before `road.js` (so `lerp` is available) and include `road.js` before `script.js`.
+6. Update `script.js`: instantiate `Road(canvas.width/2, canvas.width*0.9, 4)` and spawn car at `road.getCenter(0)`.
+7. Draw order per frame: clear (reset height) → `car.update()` → `road.draw()` → `car.draw()`.
+
+Why this change
+
+- Establishes lane geometry early for future AI (lane keeping, multi-car scenarios) and sensor alignment.
+- Dashed center dividers add motion perception and realism.
+
+Files touched
+
+- `utils.js` (new): extracted `lerp`.
+- `road.js` (new): lane rendering + geometry helpers.
+- `index.html`: added `<script src="utils.js">` and `<script src="road.js">`.
+- `script.js`: replaced hard-coded car x with lane center; draw road each frame.
+
+How to test
+
+- Open `index.html`; verify 4 lanes (3 interior dashed lines + 2 solid borders).
+- Change lane count to 5; interior dashed lines increase accordingly.
+- Move car with Arrow keys; road lines remain static (infinite illusion from large extents).
+
+Suggested commit message
+
+- "Road: add multi-lane rendering with dashed interior dividers and lane centering"
+
+---
+
 ## 2025-08-19 — 0003: Fix reverse speed clamp so car stops after releasing ArrowDown
 
 Summary

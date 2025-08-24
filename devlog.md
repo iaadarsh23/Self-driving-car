@@ -31,7 +31,9 @@ Modules
 
 - `controls.js` — `Controls` class attaches key listeners to `document` and exposes booleans: `forward`, `backward`, `left`, `right`.
 - `car.js` — `Car` class encapsulates state (position, velocity scalar as `speed`, `angle`) and rendering (`draw`). Depends on `Controls`.
-- `script.js` — Entry point: sets up canvas, creates the `Car`, and runs the animation loop.
+- `road.js` — `Road` draws multi‑lane vertical road using large extents (`top=-∞`, `bottom=+∞` via big numbers), dashed interior lane lines, solid borders, lane center helper `getCenter(index)`.
+- `utils.js` — Math helpers (`lerp` now; expandable for clamp, map, etc.).
+- `script.js` — Entry point: builds `Road`, spawns `Car` in lane center, runs loop.
 
 Key dependencies
 
@@ -61,7 +63,7 @@ Constraints and clamps
 Animation
 
 - `requestAnimationFrame(animate)` loop.
-- Each frame: `car.update()` → set `canvas.height = window.innerHeight` to clear → `car.draw(ctx)`.
+- Each frame: clear (reset canvas height) → `car.update()` → `road.draw(ctx)` → `car.draw(ctx)`.
 
 ---
 
@@ -82,8 +84,9 @@ Animation
 `script.js`
 
 - Canvas: width fixed at 200; height set every frame to `window.innerHeight`.
-- Creates `Car(100, 100, 30, 50)` and sets `car.color = "blue"`.
-- `animate()` drives the update/draw loop.
+- Creates `Road(canvas.width / 2, canvas.width * 0.9, 4)`.
+- Spawns `Car(road.getCenter(0), 100, 30, 50)`; sets `car.color = "blue"`.
+- `animate()` sequence: update → road draw → car draw.
 
 ---
 
@@ -91,7 +94,7 @@ Animation
 
 High‑level flow
 
-Controls (keyboard) → Car.update() → Pose (x,y,angle,speed) → Car.draw(ctx) → Canvas
+Controls (keyboard) → Car.update() → Pose (x,y,angle,speed) → Road.draw + Car.draw → Canvas
 
 Sequence per frame
 
@@ -99,7 +102,7 @@ Sequence per frame
 2. Update `speed` with acceleration or deceleration; apply friction.
 3. Apply steering if moving; possibly reverse steering sign.
 4. Integrate `(x,y)` with sin/cos of `angle`.
-5. Clear canvas (reset height) and render car.
+5. Clear canvas (reset height) → render road → render car.
 
 ---
 
@@ -107,8 +110,9 @@ Sequence per frame
 
 - If nothing renders, verify script order in `index.html`.
 - Keyboard not working? Ensure the page has focus; check console for blocked key events.
-- Drifting at near‑zero speeds was fixed via `abs(speed) < friction` snap‑to‑zero.
-- Visual stretching is avoided by resetting `canvas.height` each frame (also clears the frame buffer).
+- Drifting at near‑zero speeds fixed via `abs(speed) < friction` snap‑to‑zero.
+- Visual stretching avoided by resetting `canvas.height` each frame (clears buffer).
+- Lane lines initially invisible: both endpoints positive; fixed with symmetric large extents and dashed pattern only for interior lines.
 
 ---
 
@@ -136,7 +140,8 @@ A: Extend `Car` with a `Sensor` component (ray casting from the car’s pose) an
 
 ### Next Steps & TODOs
 
-- Road rendering: lane lines, boundaries; keep canvas width narrow but draw a scrolling road.
+- (Done) Road rendering: multi‑lane with dashed interior lines.
+- Collision system: simple rectangles or polygons; later SAT or ray–segment tests.
 - Collision system: simple rectangles or polygons; later SAT or ray–segment tests.
 - Sensors: N rays with distances to obstacles; visualize as lines.
 - AI controller: basic PID or heuristic to keep car centered in lane.
