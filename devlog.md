@@ -27,13 +27,15 @@ git push -u origin main
 
 ### System Architecture
 
-Modules
+Modules (updated with AI components)
 
 - `controls.js` — `Controls` class attaches key listeners to `document` and exposes booleans: `forward`, `backward`, `left`, `right`.
-- `car.js` — `Car` class encapsulates state (position, velocity scalar as `speed`, `angle`) and rendering (`draw`). Depends on `Controls`.
+- `car.js` — Car physics + (now) AI control path (`useBrain` with neural net outputs). Maintains polygon for collision.
 - `road.js` — `Road` draws multi‑lane vertical road using large extents (`top=-∞`, `bottom=+∞` via big numbers), dashed interior lane lines, solid borders, lane center helper `getCenter(index)`.
 - `utils.js` — Math helpers (`lerp` now; expandable for clamp, map, etc.).
-- `script.js` — Entry point: builds `Road`, spawns `Car` in lane center, runs loop.
+- `network.js` — Custom feed-forward neural network (Levels with weights & biases, binary activation, mutate helper).
+- `visualizer.js` — Renders network (weights colored, activations filled, biases ring outline, arrow labels on output layer).
+- `script.js` — Simulation orchestrator: population generation, mutation after loading elite, best car selection, dual canvas rendering.
 
 Key dependencies
 
@@ -75,11 +77,11 @@ Animation
 - Private method `#addKeyboardListners()` (note: typo in name preserved) installs `document.onkeydown` and `document.onkeyup` handlers. Logs `console.table(this)` for debugging.
 - Keys: ArrowUp → forward, ArrowDown → backward, ArrowLeft → left, ArrowRight → right.
 
-`class Car(x, y, width, height)`
+`class Car(x, y, width, height, controlType)`
 
 - Properties: `x, y, width, height, color`, motion: `speed, acceleration=0.2, maxSpeed=3, friction=0.05, angle=0`.
 - `update()` implements acceleration, friction, steering flip, and pose integration.
-- `draw(ctx)` translates to `(x,y)`, rotates by `-angle`, draws a centered rectangle, fills with `color`, and restores the context.
+- AI path: builds `brain = new NeuralNetwork([sensor.rayCount, 4])`. In `update()`, sensor readings converted to offsets and passed through network; outputs map to control flags when `useBrain` is true.
 
 `script.js`
 
@@ -92,17 +94,18 @@ Animation
 
 ### Data Flow Diagrams
 
-High‑level flow
+High‑level flow (AI extended)
 
-Controls (keyboard) → Car.update() → Pose (x,y,angle,speed) → Road.draw + Car.draw → Canvas
+Sensors → Normalized distances → NeuralNetwork.feedForward → Control flags → Car physics → Pose + Polygon → Collision/Damage → Render (cars + network)
 
-Sequence per frame
+Sequence per frame (AI mode)
 
 1. Read current `Controls` booleans.
 2. Update `speed` with acceleration or deceleration; apply friction.
 3. Apply steering if moving; possibly reverse steering sign.
 4. Integrate `(x,y)` with sin/cos of `angle`.
-5. Clear canvas (reset height) → render road → render car.
+5. Pick best car (lowest y) for focus.
+6. Clear canvases → render road & cars (others translucent) → draw best car sensors → draw neural network visualization.
 
 ---
 
@@ -138,17 +141,17 @@ A: Extend `Car` with a `Sensor` component (ray casting from the car’s pose) an
 
 ---
 
-### Next Steps & TODOs
+### Next Steps & TODOs (updated)
 
 - (Done) Road rendering: multi‑lane with dashed interior lines.
 - Collision system: simple rectangles or polygons; later SAT or ray–segment tests.
 - Collision system: simple rectangles or polygons; later SAT or ray–segment tests.
-- Sensors: N rays with distances to obstacles; visualize as lines.
-- AI controller: basic PID or heuristic to keep car centered in lane.
+- Sensors: (Done) N rays with distances; future: dynamic ray spread adaptation.
+- AI controller: (Done basic NN) consider continuous throttle/steer outputs.
 - Input abstraction: allow toggling between human controls and AI.
 - Clean up: fix `#addKeyboardListners` typo; consider event listeners instead of overwriting `document.onkeydown/up`.
 - Mobile support: add touch controls or on‑screen buttons.
-- Diagnostics: FPS counter, input overlay; remove console.table in production.
+- Diagnostics: FPS counter, mutation rate slider, generation stats, sensor hit heatmap.
 
 ---
 
